@@ -1,17 +1,3 @@
-# -*- coding: utf-8 -*-
-"""geo_model.py
-
-Módulo científico para:
-- Entrenar un clasificador de ambientes tectónicos con geoquímica
-- Predecir probabilidades / detectar casos ambiguos
-- Generar diagramas clásicos (TAS / AFM / Harker / Spider)
-- Detectar columnas de coordenadas (lat/lon) aunque tengan nombres variados
-
-✅ Compatible con Streamlit Cloud:
-- NO usa Google Colab (sin !pip, sin files.upload)
-- NO ejecuta nada al importar (solo define funciones)
-
-"""
 
 from __future__ import annotations
 
