@@ -19,7 +19,9 @@ st.set_page_config(
 )
 
 st.title("🌋💻 Predicción de Ambientes Tectónicos con IA")
-st.caption("Modelo de Machine Learning aplicado a datos geoquímicos volcánicos")
+st.caption("Universidad Central del Ecuador - FIGEMPA")
+st.caption("Modelo de Machine Learning aplicado a datos geoquímicos")
+st.caption("Elaborado por: Brandon Gutiérrez///")
 
 # =========================
 # SIDEBAR
