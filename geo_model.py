@@ -233,36 +233,124 @@ def harker_suite_facets(df: pd.DataFrame, group_col: Optional[str], ncols: int =
     plt.show()
 
 
+def plot_tas_fields_reference(ax):
+    ax.set_xlim(37, 77)
+    ax.set_ylim(0, 16)
+
+   
+    for xv in [41, 45, 49, 52, 57, 63, 69, 73]:
+        ax.axvline(xv, linewidth=0.8, alpha=0.25)
+
+   
+    def draw_poly(xy, lw=1.2):
+        xs, ys = zip(*xy)
+        ax.plot(xs, ys, linewidth=lw, alpha=0.95)
+
+    # -------------------------
+    # Campo: Subalcalino (principal)
+    # -------------------------
+    # Basalt / Andesites / Dacite / Rhyolite (simplificado pero “como figura”)
+    # Basalt: ~45-52, bajo
+    draw_poly([(45, 0.0), (52, 0.0), (52, 5.0), (45, 5.0), (45, 0.0)])
+    ax.text(48.5, 2.2, "basalt", fontsize=9, ha="center")
+
+    # Basaltic andesite: 52-57
+    draw_poly([(52, 0.0), (57, 0.0), (57, 5.8), (52, 5.8), (52, 0.0)])
+    ax.text(54.5, 2.4, "basaltic\nandesite", fontsize=8, ha="center")
+
+    # Andesite: 57-63
+    draw_poly([(57, 0.0), (63, 0.0), (63, 6.5), (57, 6.5), (57, 0.0)])
+    ax.text(60.0, 3.0, "andesite", fontsize=9, ha="center")
+
+    # Dacite: 63-69
+    draw_poly([(63, 0.0), (69, 0.0), (69, 7.5), (63, 7.5), (63, 0.0)])
+    ax.text(66.0, 4.0, "dacite", fontsize=9, ha="center")
+
+    # Rhyolite: >69 (cuña)
+    draw_poly([(69, 0.0), (77, 0.0), (77, 16), (73, 8.0), (69, 7.5), (69, 0.0)])
+    ax.text(74.5, 8.7, "rhyolite", fontsize=9, ha="center")
+
+    # Picrobasalt: ~41-45, muy bajo
+    draw_poly([(41, 0.0), (45, 0.0), (45, 3.0), (41, 3.0), (41, 0.0)])
+    ax.text(43.0, 1.3, "picro-\nbasalt", fontsize=8, ha="center")
+
+    # -------------------------
+    # Campo: Alcalino (izquierda-media)
+    # basanite / tephrite, trachybasalt, basaltic trachyandesite
+    # -------------------------
+    # Basanite/Tephrite (ol<10) ~41-45, 3-7
+    draw_poly([(41, 3.0), (45, 3.0), (45, 7.0), (41, 7.0), (41, 3.0)])
+    ax.text(43.0, 5.0, "basanite\n(ol<10%)\ntephrite\n(ol<10%)", fontsize=7, ha="center")
+
+    # Trachybasalt ~45-52, 5-9
+    draw_poly([(45, 5.0), (52, 5.0), (52, 9.0), (45, 9.0), (45, 5.0)])
+    ax.text(48.5, 7.0, "trachy-\nbasalt", fontsize=8, ha="center")
+
+    # Basaltic trachyandesite ~52-57, 5.8-10
+    draw_poly([(52, 5.8), (57, 5.8), (57, 10.0), (52, 10.0), (52, 5.8)])
+    ax.text(54.5, 8.0, "basaltic\ntrachy-\nandesite", fontsize=7, ha="center")
+
+    # Trachyandesite ~57-63, 6.5-11
+    draw_poly([(57, 6.5), (63, 6.5), (63, 11.0), (57, 11.0), (57, 6.5)])
+    ax.text(60.0, 8.7, "trachy-\nandesite", fontsize=8, ha="center")
+
+    # Trachydacite ~63-69, 7.5-12
+    draw_poly([(63, 7.5), (69, 7.5), (69, 12.0), (63, 12.0), (63, 7.5)])
+    ax.text(66.0, 9.8, "trachy-\ndacite", fontsize=8, ha="center")
+
+    # Trachyte (q<20%) ~69-73, 8-13
+    draw_poly([(69, 8.0), (73, 8.0), (73, 13.0), (69, 13.0), (69, 8.0)])
+    ax.text(71.0, 10.7, "trachyte\n(q<20%)", fontsize=8, ha="center")
+
+    # -------------------------
+    # Campos: Fonolíticos (parte alta central)
+    # -------------------------
+    # Phonolite (tope) ~52-63, 12-16
+    draw_poly([(52, 12.0), (63, 12.0), (63, 16.0), (52, 16.0), (52, 12.0)])
+    ax.text(57.5, 14.4, "phonolite", fontsize=9, ha="center")
+
+    # Tephriphonolite ~49-57, 10-12
+    draw_poly([(49, 10.0), (57, 10.0), (57, 12.0), (49, 12.0), (49, 10.0)])
+    ax.text(53.0, 11.0, "tephri-\nphonolite", fontsize=8, ha="center")
+
+    # Phonotephrite ~45-52, 9-11
+    draw_poly([(45, 9.0), (52, 9.0), (52, 11.0), (45, 11.0), (45, 9.0)])
+    ax.text(48.5, 10.0, "phono-\ntephrite", fontsize=8, ha="center")
+
+    # Foidite (gran campo alto izquierdo) ~37-45, 11-16
+    draw_poly([(37, 11.0), (45, 11.0), (45, 16.0), (37, 16.0), (37, 11.0)])
+    ax.text(41.0, 13.5, "foidite", fontsize=9, ha="center")
+
+    ax.set_xlabel("Wt. % SiO$_2$")
+    ax.set_ylabel("Wt. % Na$_2$O = K$_2$O")
+    ax.set_title("TAS (campos clásicos, estilo referencia)")
+    ax.grid(True, alpha=0.12)
+
+
 def tas_rock_type_simple(df: pd.DataFrame) -> Optional[str]:
-    for c in ["TipoRoca","Tipo_Roca","RockType","Rock_Type","Roca","Tipo"]:
+    """
+    Intenta detectar columna de tipo roca automáticamente.
+    """
+    for c in ["TipoRoca", "Tipo_Roca", "RockType", "Rock_Type", "Roca", "Tipo", "Lithology", "Litologia"]:
         if c in df.columns:
             return c
     return None
 
 
-def plot_tas_fields_clean(ax) -> None:
-    ax.set_xlim(35, 80)
-    ax.set_ylim(0, 16)
-
-    for xv in [41, 45, 52, 57, 63, 69]:
-        ax.axvline(xv, linewidth=0.9, alpha=0.35)
-
-    xs = np.array([41, 45, 52, 57, 63, 69, 77])
-    ys = np.array([3.0, 5.0, 5.5, 6.0, 7.0, 8.0, 1.0])
-    ax.plot(xs, ys, linewidth=1.2, alpha=0.85)
-
-    ax.text(45.5, 1.8, "Basalto", fontsize=9)
-    ax.text(55.0, 2.2, "Andesita\nbasáltica", fontsize=8, ha="center")
-    ax.text(60.0, 2.6, "Andesita", fontsize=9, ha="center")
-    ax.text(66.0, 4.3, "Dacita", fontsize=9, ha="center")
-    ax.text(73.0, 6.2, "Riolita", fontsize=9, ha="center")
-
-    ax.set_xlabel("SiO$_2$ (wt%)")
-    ax.set_ylabel("Na$_2$O + K$_2$O (wt%)")
+def iter_groups(df: pd.DataFrame, group_col: str):
+    if (group_col is None) or (group_col not in df.columns):
+        return []
+    groups = [str(g) for g in df[group_col].dropna().unique()]
+    non_t = [g for g in groups if g.lower() != "transicional"]
+    t = [g for g in groups if g.lower() == "transicional"]
+    return sorted(non_t) + t
 
 
 def tas_facets_by_rocktype(df: pd.DataFrame, group_col: Optional[str], ncols: int = 3,
                            s: int = 12, alpha: float = 0.55, max_points: int = 2500, seed: int = 42) -> None:
+    """
+    TAS por ambiente en paneles. Dentro de cada panel, colorea por tipo de roca si existe.
+    """
     need = {"SiO2","Na2O","K2O"}
     if not need.issubset(df.columns):
         print("⚠️ TAS: faltan SiO2, Na2O o K2O.")
@@ -272,9 +360,8 @@ def tas_facets_by_rocktype(df: pd.DataFrame, group_col: Optional[str], ncols: in
     dd["Na2OplusK2O"] = dd["Na2O"] + dd["K2O"]
 
     if not group_col or group_col not in dd.columns:
-        # un solo panel si no hay grupos
         fig, ax = plt.subplots(figsize=(8, 4.8))
-        plot_tas_fields_clean(ax)
+        plot_tas_fields_reference(ax)
         ax.scatter(dd["SiO2"], dd["Na2OplusK2O"], s=s, alpha=alpha)
         plt.tight_layout()
         plt.show()
@@ -288,7 +375,7 @@ def tas_facets_by_rocktype(df: pd.DataFrame, group_col: Optional[str], ncols: in
 
     n = len(groups)
     nrows = int(np.ceil(n / ncols))
-    fig, axes = plt.subplots(nrows, ncols, figsize=(4.2*ncols, 3.4*nrows), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(4.4*ncols, 3.6*nrows), squeeze=False)
 
     for i, gname in enumerate(groups):
         ax = axes[i//ncols][i % ncols]
@@ -296,7 +383,7 @@ def tas_facets_by_rocktype(df: pd.DataFrame, group_col: Optional[str], ncols: in
         if len(g) > max_points:
             g = g.sample(max_points, random_state=seed)
 
-        plot_tas_fields_clean(ax)
+        plot_tas_fields_reference(ax)
 
         if rock_col is not None:
             for rname, gr in g.groupby(rock_col):
