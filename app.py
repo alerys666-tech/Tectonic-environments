@@ -139,7 +139,7 @@ with tab_pred:
 with tab_classic:
     group_col = geo_model.pick_group_col(df_new)
 
-    if st.checkbox("TAS (Solo rocas volcánicas"):
+    if st.checkbox("TAS (Solo rocas volcánicas)"):
         geo_model.tas_facets_by_rocktype(df_new, group_col)
         st.pyplot(plt.gcf()); plt.close()
 
