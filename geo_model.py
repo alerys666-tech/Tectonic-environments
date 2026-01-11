@@ -57,10 +57,7 @@ def add_ratios(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def read_any(path_or_buffer: Union[str, Path, "pd.io.common.FilePathOrBuffer", object]) -> pd.DataFrame:
-    """Lee Excel/CSV desde:
-    - ruta (str/Path)
-    - buffer tipo Streamlit UploadedFile
-    """
+
     if isinstance(path_or_buffer, (str, Path)):
         p = str(path_or_buffer)
         if p.lower().endswith(".csv"):
@@ -328,9 +325,7 @@ def plot_tas_fields_reference(ax):
 
 
 def tas_rock_type_simple(df: pd.DataFrame) -> Optional[str]:
-    """
-    Intenta detectar columna de tipo roca automáticamente.
-    """
+ 
     for c in ["TipoRoca", "Tipo_Roca", "RockType", "Rock_Type", "Roca", "Tipo", "Lithology", "Litologia"]:
         if c in df.columns:
             return c
@@ -348,9 +343,7 @@ def iter_groups(df: pd.DataFrame, group_col: str):
 
 def tas_facets_by_rocktype(df: pd.DataFrame, group_col: Optional[str], ncols: int = 3,
                            s: int = 12, alpha: float = 0.55, max_points: int = 2500, seed: int = 42) -> None:
-    """
-    TAS por ambiente en paneles. Dentro de cada panel, colorea por tipo de roca si existe.
-    """
+
     need = {"SiO2","Na2O","K2O"}
     if not need.issubset(df.columns):
         print("⚠️ TAS: faltan SiO2, Na2O o K2O.")
