@@ -14,11 +14,11 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 
 st.set_page_config(
     page_title="IA Geoquímica – Ambientes Tectónicos",
-    page_icon="🧪",
+    page_icon="🌋💻",
     layout="wide"
 )
 
-st.title("🧪 Predicción de Ambientes Tectónicos con IA")
+st.title("🌋💻 Predicción de Ambientes Tectónicos con IA")
 st.caption("Modelo de Machine Learning aplicado a datos geoquímicos volcánicos")
 
 # =========================
@@ -34,9 +34,9 @@ with st.sidebar:
 # =========================
 col1, col2 = st.columns(2)
 with col1:
-    train_file = st.file_uploader("📄 Archivo de entrenamiento (con Ambiente_Tectonico)", type=["xlsx","csv"])
+    train_file = st.file_uploader("📄 Subir archivo de entrenamiento (con columna Ambiente_Tectonico)", type=["xlsx","csv"])
 with col2:
-    new_file = st.file_uploader("📄 Archivo nuevo para predecir", type=["xlsx","csv"])
+    new_file = st.file_uploader("📄 Subir archivo nuevo para predecir", type=["xlsx","csv"])
 
 if not train_file or not new_file:
     st.info("⬆️ Sube ambos archivos para ejecutar el modelo.")
@@ -150,7 +150,9 @@ with tab_classic:
     if st.checkbox("Spider"):
         geo_model.spider_all_classes(df_new, group_col)
         st.pyplot(plt.gcf()); plt.close()
-
+    if st.checkbox("Harker"):
+        geo_model.harker_suite_facets(df_new, group_col)
+        st.pyplot(plt.gcf()); plt.close()
 # =========================
 # MAPA
 # =========================
