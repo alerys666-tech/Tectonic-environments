@@ -153,6 +153,12 @@ with tab_classic:
     if st.checkbox("Harker"):
         geo_model.harker_suite_facets(df_new, group_col)
         st.pyplot(plt.gcf()); plt.close()
+    if st.checkbox("K₂O vs SiO₂"):
+        geo_model.k2o_sio2_series_facets(df, group_col)
+        st.pyplot(plt.gcf()); plt.close()
+     if st.checkbox("Shand A/NK vs A/CNK"):
+        geo_model.shand_facets(df, group_col)
+        st.pyplot(plt.gcf()); plt.close()   
 # =========================
 # MAPA
 # =========================
