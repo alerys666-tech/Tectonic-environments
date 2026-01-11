@@ -598,7 +598,7 @@ def k2o_sio2_series_facets(
         plt.tight_layout(); plt.show()
         return
 
-    groups = _iter_groups_pretty(dd, group_col)
+    groups = iter_groups(dd, group_col)
     n = len(groups)
     if n == 0:
         print("⚠️ K2O-SiO2: no hay grupos.")
@@ -691,7 +691,7 @@ def shand_facets(
         plt.tight_layout(); plt.show()
         return
 
-    groups = _iter_groups_pretty(dd, group_col)
+    groups = iter_groups(dd, group_col)
     n = len(groups)
     if n == 0:
         print("⚠️ Shand: no hay grupos.")
