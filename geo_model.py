@@ -174,6 +174,7 @@ def add_prediction_columns(
 # ============================================================
 # 3) GRÁFICAS
 # ============================================================
+
 def iter_groups(df: pd.DataFrame, group_col: Optional[str]) -> list[str]:
     if not group_col or group_col not in df.columns:
         return []
@@ -182,7 +183,14 @@ def iter_groups(df: pd.DataFrame, group_col: Optional[str]) -> list[str]:
     t = [g for g in groups if g.lower() == "transicional"]
     return sorted(non_t) + t
 
+def _safe_numeric(series: pd.Series) -> pd.Series:
+    # Convierte texto con comas/espacios a numérico
+    s = series.astype(str).str.replace(",", ".", regex=False).str.strip()
+    return pd.to_numeric(s, errors="coerce")
 
+def _scatter_simple(ax, x, y, s=12, alpha=0.55):
+    ax.scatter(x, y, s=s, alpha=alpha, rasterized=True)
+    
 def pick_group_col(df: pd.DataFrame) -> Optional[str]:
     for c in ["Pred_Final","Pred_Ambiente",LABEL_COL,"Ambiente","Grupo","Sample SubType","Sample Type"]:
         if c in df.columns:
@@ -523,7 +531,189 @@ def spider_facets(df: pd.DataFrame, group_col: Optional[str], ncols: int = 3) ->
 
     plt.tight_layout()
     plt.show()
+def plot_k2o_sio2_series_fields(ax):
+    """
+    Campos aproximados clásicos para K2O vs SiO2:
+    - Toleítica
+    - Calco-alcalina
+    - Calco-alcalina alto K
+    - Shoshonítica
+    (Líneas aproximadas ampliamente usadas en petrología)
+    """
+    ax.set_xlim(45, 80)
+    ax.set_ylim(0, 7)
 
+    # Líneas aproximadas separadoras (se ven como en tu figura)
+    # Toleítica / Calco-alcalina
+    x = np.array([45, 50, 55, 60, 65, 70, 75, 80])
+    y1 = np.array([0.2, 0.35, 0.55, 0.8, 1.05, 1.25, 1.45, 1.6])  # toleítica / calcoalcalina
+
+    # Calco-alcalina / Alto-K calcoalcalina
+    y2 = np.array([0.6, 0.9, 1.25, 1.65, 2.05, 2.45, 2.85, 3.2])
+
+    # Alto-K / Shoshonítica
+    y3 = np.array([1.6, 2.2, 3.2, 3.6, 4.1, 4.6, 5.1, 5.6])
+
+    ax.plot(x, y1, linewidth=1.2)
+    ax.plot(x, y2, linewidth=1.2)
+    ax.plot(x, y3, linewidth=1.2)
+
+    # Etiquetas
+    ax.text(73, 0.9, "serie Toleítica", fontsize=9, ha="right")
+    ax.text(73, 2.0, "serie Calco-alcalina", fontsize=9, ha="right")
+    ax.text(76, 3.7, "serie Calco-alcalina\ncon alto K", fontsize=9, ha="right")
+    ax.text(55, 4.6, "serie Shoshonítica", fontsize=9, ha="center")
+
+    ax.set_xlabel("SiO$_2$ (wt%)")
+    ax.set_ylabel("K$_2$O (wt%)")
+    ax.set_title("K$_2$O vs SiO$_2$ (series magmáticas)")
+    ax.grid(True, alpha=0.15)
+
+def k2o_sio2_series_facets(
+    df: pd.DataFrame,
+    group_col: Optional[str],
+    ncols: int = 3,
+    s: int = 12,
+    alpha: float = 0.55,
+    max_points: int = 2500,
+    seed: int = 42
+) -> None:
+    need = {"SiO2","K2O"}
+    if not need.issubset(df.columns):
+        print("⚠️ K2O-SiO2: faltan SiO2 o K2O.")
+        return
+
+    dd = df.copy()
+    dd["SiO2"] = _safe_numeric(dd["SiO2"])
+    dd["K2O"]  = _safe_numeric(dd["K2O"])
+    dd = dd.dropna(subset=["SiO2","K2O"])
+    if dd.empty:
+        print("⚠️ K2O-SiO2: sin datos válidos.")
+        return
+
+    if (not group_col) or (group_col not in dd.columns):
+        fig, ax = plt.subplots(figsize=(7.5, 5))
+        plot_k2o_sio2_series_fields(ax)
+        _scatter_simple(ax, dd["SiO2"], dd["K2O"], s=s, alpha=alpha)
+        plt.tight_layout(); plt.show()
+        return
+
+    groups = _iter_groups_pretty(dd, group_col)
+    n = len(groups)
+    if n == 0:
+        print("⚠️ K2O-SiO2: no hay grupos.")
+        return
+
+    nrows = int(np.ceil(n / ncols))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(4.4*ncols, 3.6*nrows), squeeze=False)
+
+    for i, gname in enumerate(groups):
+        ax = axes[i//ncols][i % ncols]
+        g = dd[dd[group_col].astype(str) == str(gname)].copy()
+        if len(g) > max_points:
+            g = g.sample(max_points, random_state=seed)
+
+        plot_k2o_sio2_series_fields(ax)
+        _scatter_simple(ax, g["SiO2"], g["K2O"], s=s, alpha=alpha)
+        ax.set_title(str(gname), fontsize=9)
+
+    for j in range(n, nrows*ncols):
+        axes[j//ncols][j % ncols].axis("off")
+
+    plt.tight_layout(); plt.show()
+
+
+# ============================================================
+# 2) Shand diagram: A/NK vs A/CNK (peralcalina, metaluminosa, peraluminosa)
+# ============================================================
+def plot_shand_fields(ax):
+
+    ax.set_xlim(0.5, 2.0)
+    ax.set_ylim(0.5, 7.0)
+
+    # Línea vertical A/CNK = 1
+    ax.axvline(1.0, linewidth=1.2, alpha=0.8)
+    # Línea horizontal A/NK = 1
+    ax.axhline(1.0, linewidth=1.2, alpha=0.8)
+
+    # Línea guía típica (inclinada) a veces se dibuja (opcional)
+    x = np.array([0.5, 2.0])
+    y = 0.6 + 0.7*(x - 0.5)  # línea suave estilo tu figura
+    ax.plot(x, y, linestyle="--", linewidth=1.0, alpha=0.7)
+
+    ax.text(0.75, 0.75, "Peralcalina", fontsize=9, ha="center", alpha=0.9)
+    ax.text(0.75, 6.2, "Metaluminosa", fontsize=9, ha="center", alpha=0.9)
+    ax.text(1.45, 6.2, "Peraluminosa", fontsize=9, ha="center", alpha=0.9)
+
+    ax.set_xlabel("A/CNK = Al$_2$O$_3$ / (CaO + Na$_2$O + K$_2$O)")
+    ax.set_ylabel("A/NK = Al$_2$O$_3$ / (Na$_2$O + K$_2$O)")
+    ax.set_title("Shand: A/NK vs A/CNK")
+    ax.grid(True, alpha=0.15)
+
+def shand_facets(
+    df: pd.DataFrame,
+    group_col: Optional[str],
+    ncols: int = 3,
+    s: int = 12,
+    alpha: float = 0.55,
+    max_points: int = 2500,
+    seed: int = 42
+) -> None:
+    need = {"Al2O3","CaO","Na2O","K2O"}
+    if not need.issubset(df.columns):
+        print("⚠️ Shand: faltan Al2O3, CaO, Na2O o K2O.")
+        return
+
+    dd = df.copy()
+    for c in ["Al2O3","CaO","Na2O","K2O"]:
+        dd[c] = _safe_numeric(dd[c])
+
+    dd = dd.dropna(subset=["Al2O3","CaO","Na2O","K2O"]).copy()
+    dd = dd[(dd["Al2O3"] > 0) & ((dd["Na2O"] + dd["K2O"]) > 0) & ((dd["CaO"] + dd["Na2O"] + dd["K2O"]) > 0)]
+    if dd.empty:
+        print("⚠️ Shand: sin datos válidos.")
+        return
+
+    dd["A_NK"]  = dd["Al2O3"] / (dd["Na2O"] + dd["K2O"])
+    dd["A_CNK"] = dd["Al2O3"] / (dd["CaO"] + dd["Na2O"] + dd["K2O"])
+
+    # Limitar rangos para plot limpio
+    dd = dd.replace([np.inf, -np.inf], np.nan).dropna(subset=["A_NK","A_CNK"])
+    dd = dd[(dd["A_CNK"].between(0.5, 2.0)) & (dd["A_NK"].between(0.5, 7.0))]
+    if dd.empty:
+        print("⚠️ Shand: todo quedó fuera de rango (revisar óxidos / unidades).")
+        return
+
+    if (not group_col) or (group_col not in dd.columns):
+        fig, ax = plt.subplots(figsize=(7.5, 5.2))
+        plot_shand_fields(ax)
+        _scatter_simple(ax, dd["A_CNK"], dd["A_NK"], s=s, alpha=alpha)
+        plt.tight_layout(); plt.show()
+        return
+
+    groups = _iter_groups_pretty(dd, group_col)
+    n = len(groups)
+    if n == 0:
+        print("⚠️ Shand: no hay grupos.")
+        return
+
+    nrows = int(np.ceil(n / ncols))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(4.6*ncols, 3.7*nrows), squeeze=False)
+
+    for i, gname in enumerate(groups):
+        ax = axes[i//ncols][i % ncols]
+        g = dd[dd[group_col].astype(str) == str(gname)].copy()
+        if len(g) > max_points:
+            g = g.sample(max_points, random_state=seed)
+
+        plot_shand_fields(ax)
+        _scatter_simple(ax, g["A_CNK"], g["A_NK"], s=s, alpha=alpha)
+        ax.set_title(str(gname), fontsize=9)
+
+    for j in range(n, nrows*ncols):
+        axes[j//ncols][j % ncols].axis("off")
+
+    plt.tight_layout(); plt.show()
 
 # ============================================================
 # 4) Coordenadas: detección robusta de lat/lon
