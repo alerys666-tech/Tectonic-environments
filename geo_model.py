@@ -377,15 +377,18 @@ def tas_facets_by_rocktype(df: pd.DataFrame, group_col: Optional[str], ncols: in
             g = g.sample(max_points, random_state=seed)
 
         plot_tas_fields_reference(ax)
-
-        if rock_col is not None:
-            for rname, gr in g.groupby(rock_col):
-                ax.scatter(gr["SiO2"], gr["Na2OplusK2O"], s=s, alpha=alpha, label=str(rname), rasterized=True)
-            ax.legend(fontsize=7, loc="best", frameon=True)
-        else:
-            ax.scatter(g["SiO2"], g["Na2OplusK2O"], s=s, alpha=alpha, rasterized=True)
+        
+        ax.scatter(
+            g["SiO2"],
+            g["Na2OplusK2O"],
+            s=s,
+            alpha=alpha,
+            color="black",
+            rasterized=True
+        )
 
         ax.set_title(str(gname), fontsize=9)
+
 
     for j in range(n, nrows*ncols):
         axes[j//ncols][j % ncols].axis("off")
