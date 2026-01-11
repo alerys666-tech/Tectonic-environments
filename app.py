@@ -154,9 +154,36 @@ with tab_classic:
 # =========================
 # MAPA
 # =========================
-with tab_map:
-    lat, lon = geo_model.detect_lat_lon_cols(df_new)
-    if lat and lon:
-        st.map(df_new.rename(columns={lat:"lat", lon:"lon"})[["lat","lon"]])
+# --- MAPA (robusto) ---
+lat, lon = geo_model.detect_lat_lon_cols(df_new)
+
+if lat and lon:
+    ddm = df_new.copy()
+
+    # convertir a numérico (arregla comas, grados, texto raro)
+    ddm[lat] = (
+        ddm[lat].astype(str)
+        .str.replace(",", ".", regex=False)
+        .str.replace("°", "", regex=False)
+        .str.strip()
+    )
+    ddm[lon] = (
+        ddm[lon].astype(str)
+        .str.replace(",", ".", regex=False)
+        .str.replace("°", "", regex=False)
+        .str.strip()
+    )
+
+    ddm[lat] = pd.to_numeric(ddm[lat], errors="coerce")
+    ddm[lon] = pd.to_numeric(ddm[lon], errors="coerce")
+
+    # filtrar NaN y rangos válidos lat/lon
+    ddm = ddm.dropna(subset=[lat, lon]).copy()
+    ddm = ddm[(ddm[lat].between(-90, 90)) & (ddm[lon].between(-180, 180))]
+
+    if ddm.empty:
+        st.warning("Detecté columnas de coordenadas, pero no hay lat/lon válidos (pueden ser UTM o texto).")
     else:
-        st.warning("No se detectaron coordenadas geográficas.")
+        st.map(ddm.rename(columns={lat: "lat", lon: "lon"})[["lat", "lon"]])
+else:
+    st.info("No se detectaron columnas de latitud/longitud.")
