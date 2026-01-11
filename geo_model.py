@@ -1,6 +1,3 @@
-!pip -q install pandas numpy scikit-learn matplotlib joblib shap xgboost openpyxl
-
-from google.colab import files
 from pathlib import Path
 import numpy as np
 import pandas as pd
