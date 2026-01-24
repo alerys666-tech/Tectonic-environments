@@ -149,7 +149,7 @@ def add_prediction_columns(
     df_new[group_col_out] = np.where(
         df_new["Confianza"] >= float(threshold_transicional),
         df_new["Pred_Ambiente"],
-        "Transicional"
+        "Indeterminado"
     )
 
     # columnas proba_*
